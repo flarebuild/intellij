@@ -27,10 +27,12 @@ import com.google.idea.blaze.base.sync.workspace.ArtifactLocationDecoder;
 import com.google.idea.blaze.java.libraries.AttachedSourceJarManager;
 import com.google.idea.blaze.java.libraries.JarCache;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.roots.libraries.Library;
 import java.io.File;
+import com.google.common.collect.ImmutableList;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
@@ -78,11 +80,13 @@ public final class BlazeJarLibrary extends BlazeLibrary {
     }
 
     AttachedSourceJarManager sourceJarManager = AttachedSourceJarManager.getInstance(project);
-    for (AttachSourcesFilter decider : AttachSourcesFilter.EP_NAME.getExtensions()) {
-      if (decider.shouldAlwaysAttachSourceJar(this)) {
-        sourceJarManager.setHasSourceJarAttached(key, true);
-      }
-    }
+//    for (AttachSourcesFilter decider : AttachSourcesFilter.EP_NAME.getExtensions()) {
+//      if (decider.shouldAlwaysAttachSourceJar(this)) {
+//        sourceJarManager.setHasSourceJarAttached(key, true);
+//      }
+//    }
+
+    sourceJarManager.setHasSourceJarAttached(key, true);
 
     if (!sourceJarManager.hasSourceJarAttached(key)) {
       return;

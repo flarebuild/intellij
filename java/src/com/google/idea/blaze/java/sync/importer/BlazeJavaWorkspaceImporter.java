@@ -17,6 +17,7 @@ package com.google.idea.blaze.java.sync.importer;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -206,6 +207,7 @@ public final class BlazeJavaWorkspaceImporter {
         ArtifactLocation srcJar = guessSrcJarLocation(artifact);
         ImmutableList<ArtifactLocation> srcJars =
             srcJar != null ? ImmutableList.of(srcJar) : ImmutableList.of();
+        srcJars = kohsukeHack(artifact, srcJars);
         library =
             new BlazeJarLibrary(
                 new LibraryArtifact(artifact, null, srcJars), /* targetKey= */ null);
@@ -241,6 +243,25 @@ public final class BlazeJavaWorkspaceImporter {
     if (classJar != null) {
       jdepsPathToLibrary.put(classJar.getRelativePath(), library);
     }
+  }
+
+  /**
+   * See Jul 22 entry of
+   * the journal https://launchableinc.atlassian.net/wiki/spaces/RnD/pages/482804256/Journal%3A+Bazel+IntelliJ+plugin+doesn%27t+resolve+all+dependencies
+   *
+   * Also see https://github.com/bazelbuild/intellij/issues/1957
+   * Take advantage of the layout convention that source jars are always placed side by side with the jar.
+   */
+  private ImmutableList<ArtifactLocation> kohsukeHack(ArtifactLocation artifact, ImmutableList<ArtifactLocation> srcJars) {
+    String path = artifact.getRelativePath();
+    if (path.endsWith(".jar")) {
+      path = path.substring(0, path.length()-4)+"-sources.jar";
+
+      List<ArtifactLocation> updated = new ArrayList<>(srcJars);
+      updated.add(ArtifactLocation.Builder.copy(artifact).setRelativePath(path).build());
+      return ImmutableList.copyOf(updated);
+    }
+    return srcJars;
   }
 
   private void addTargetAsSource(

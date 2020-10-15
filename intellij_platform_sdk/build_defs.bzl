@@ -207,6 +207,6 @@ def select_from_plugin_api_directory(intellij, android_studio, clion, intellij_u
         params[ij_product] = [_plugin_api_directory(value) + item for item in ide_to_value[value.ide]]
 
     # No ij_product == intellij-latest
-    params["default"] = params[INDIRECT_IJ_PRODUCTS["intellij-latest"]]
+    params["default"] = params[INDIRECT_IJ_PRODUCTS["intellij-ue-latest"]]
 
     return select_for_plugin_api(params)

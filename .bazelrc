@@ -1,0 +1,7 @@
+build --javabase=//tools/build_rules:remote_jdk8
+build --host_javabase=//tools/build_rules:remote_jdk8
+build --host_java_toolchain=@bazel_tools//tools/jdk:toolchain_vanilla
+build --java_toolchain=@bazel_tools//tools/jdk:toolchain_vanilla
+build --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+build --crosstool_top=@bazel_tools//tools/cpp:toolchain
+build --define=ij_product=intellij-ue-latest

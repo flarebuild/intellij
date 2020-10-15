@@ -22,6 +22,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.devtools.intellij.ideinfo.IntellijIdeInfo;
 import com.google.idea.common.experiments.BoolExperiment;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Represents a jar artifact. */
 public final class LibraryArtifact implements ProtoWrapper<IntellijIdeInfo.LibraryArtifact> {
@@ -77,7 +79,26 @@ public final class LibraryArtifact implements ProtoWrapper<IntellijIdeInfo.Libra
   }
 
   public ImmutableList<ArtifactLocation> getSourceJars() {
-    return sourceJars;
+    return kohsukeHack(classJar, sourceJars);
+  }
+
+  /**
+   * See Jul 22 entry of
+   * the journal https://launchableinc.atlassian.net/wiki/spaces/RnD/pages/482804256/Journal%3A+Bazel+IntelliJ+plugin+doesn%27t+resolve+all+dependencies
+   *
+   * Also see https://github.com/bazelbuild/intellij/issues/1957
+   * Take advantage of the layout convention that source jars are always placed side by side with the jar.
+   */
+  private ImmutableList<ArtifactLocation> kohsukeHack(ArtifactLocation artifact, ImmutableList<ArtifactLocation> srcJars) {
+    String path = artifact.getRelativePath();
+    if (path.endsWith(".jar")) {
+      path = path.substring(0, path.length()-4)+"-sources.jar";
+
+      List<ArtifactLocation> updated = new ArrayList<>(srcJars);
+      updated.add(ArtifactLocation.Builder.copy(artifact).setRelativePath(path).build());
+      return ImmutableList.copyOf(updated);
+    }
+    return srcJars;
   }
 
   /**
